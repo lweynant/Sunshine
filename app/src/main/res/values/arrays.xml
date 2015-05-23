@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string-array name="prefs_units">
-        <item>metric</item>
-        <item>imperial</item>
+        <item>@string/pref_units_label_metric</item>
+        <item>@string/pref_units_label_imperial</item>
     </string-array>
-    <string-array name="prefs_units_human_readable" >
-        <item>celcius</item>
-        <item>fahrenheit</item>
-        </string-array>
+
+    <string-array name="prefs_units_human_readable">
+        <item>@string/pref_units_metric</item>
+        <item>@string/pref_units_imperial</item>
+    </string-array>
 </resources>
