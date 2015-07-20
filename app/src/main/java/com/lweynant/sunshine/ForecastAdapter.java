@@ -18,6 +18,11 @@ public class ForecastAdapter extends CursorAdapter {
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
     private static final String TAG = ForecastAdapter.class.getSimpleName();
+    private boolean mUseTodayLayout = true;
+
+    public void useTodayLayout(boolean useTodayLayout) {
+        mUseTodayLayout = useTodayLayout;
+    }
 
     /**
      * Cache of the children views for a forecast list item.
@@ -52,7 +57,7 @@ public class ForecastAdapter extends CursorAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        if(position == 0) return VIEW_TYPE_TODAY;
+        if(mUseTodayLayout && position == 0) return VIEW_TYPE_TODAY;
         else return VIEW_TYPE_FUTURE_DAY;
     }
 

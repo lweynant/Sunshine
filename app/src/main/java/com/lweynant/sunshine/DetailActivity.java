@@ -2,24 +2,27 @@ package com.lweynant.sunshine;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
-import android.support.v7.widget.ShareActionProvider;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class WeatherDetailActivity extends ActionBarActivity {
+public class DetailActivity extends ActionBarActivity {
 
-    private final String TAG = WeatherDetailActivity.class.getSimpleName();
+    public static final String DATE_URI_KEY = "date-uri-key";
+    private final String TAG = DetailActivity.class.getSimpleName();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_weather_detail);
+        setContentView(R.layout.activity_detail);
         if (savedInstanceState == null) {
+            Bundle arguments = new Bundle();
+            arguments.putParcelable(DATE_URI_KEY, getIntent().getData());
+            DetailFragment df = new DetailFragment();
+            df.setArguments(arguments);
+
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new WeatherDetailActivityFragment())
+                    .add(R.id.weather_detail_container, df)
                     .commit();
         }
     }

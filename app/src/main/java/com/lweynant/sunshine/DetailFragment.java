@@ -24,7 +24,7 @@ import com.lweynant.sunshine.data.WeatherContract;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class WeatherDetailActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int DETAIL_LOADER = 0;
 
     private static final String[] DETAIL_COLUMNS = {
@@ -67,7 +67,8 @@ public class WeatherDetailActivityFragment extends Fragment implements LoaderMan
     private TextView mHumidityView;
     private TextView mWindView;
     private TextView mPressureView;
-    public WeatherDetailActivityFragment() {
+    private Uri mUri;
+    public DetailFragment() {
     }
 
 
@@ -105,7 +106,11 @@ public class WeatherDetailActivityFragment extends Fragment implements LoaderMan
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_weather_detail, container, false);
+        Bundle arguments = getArguments();
+        if (arguments!=null){
+            mUri=arguments.getParcelable(DetailActivity.DATE_URI_KEY);
+        }
+        View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
         mIconView = (ImageView) rootView.findViewById(R.id.detail_icon);
         mDateView = (TextView) rootView.findViewById(R.id.detail_date_textview);
         mFriendlyDateView = (TextView) rootView.findViewById(R.id.detail_day_textview);
@@ -126,12 +131,10 @@ public class WeatherDetailActivityFragment extends Fragment implements LoaderMan
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        Intent intent = getActivity().getIntent();
-        if (intent == null) return  null;
-        Uri uri = intent.getData();
-        CursorLoader loader = new CursorLoader(getActivity(), uri, DETAIL_COLUMNS, null, null, null);
-
-        return loader;
+        if (mUri!=null) {
+            return new CursorLoader(getActivity(), mUri, DETAIL_COLUMNS, null, null, null);
+        }
+        return null;
     }
 
     @Override
@@ -191,5 +194,16 @@ public class WeatherDetailActivityFragment extends Fragment implements LoaderMan
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    public void onLocationChanged(String newLocation) {
+            // replace the uri, since the location has changed
+            Uri uri = mUri;
+            if (null != uri) {
+                long date = WeatherContract.WeatherEntry.getDateFromUri(uri);
+                Uri updatedUri = WeatherContract.WeatherEntry.buildWeatherLocationWithDate(newLocation, date);
+                mUri = updatedUri;
+                getLoaderManager().restartLoader(DETAIL_LOADER, null, this);
+            }
     }
 }
