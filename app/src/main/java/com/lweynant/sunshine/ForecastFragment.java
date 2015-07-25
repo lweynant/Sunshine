@@ -1,5 +1,9 @@
 package com.lweynant.sunshine;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
@@ -7,6 +11,7 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,6 +22,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.lweynant.sunshine.data.WeatherContract;
+import com.lweynant.sunshine.service.SunshineService;
 
 
 /**
@@ -25,6 +31,7 @@ import com.lweynant.sunshine.data.WeatherContract;
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static final String SELECTED_KEY = "selected-key";
+    private static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     private int mPosition;
     private ListView mListView;
     private boolean mUseTodayLayout;
@@ -47,7 +54,7 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
          */
         public void onItemSelected(Uri dateUri);
     }
-    final static int LOADER_ID = 1;
+    final static int FORCAST_LOADER_ID = 1;
     ForecastAdapter mForecastAdapter;
 
     private static final String[] FORECAST_COLUMNS = {
@@ -87,19 +94,22 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
     @Override
     public void onStart() {
         super.onStart();
+        Log.d(LOG_TAG, "onStart");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        Log.d(LOG_TAG, "onCreate");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        Log.d(LOG_TAG, "onCreateView");
 
-        getLoaderManager().initLoader(LOADER_ID, null, this);
+        getLoaderManager().initLoader(FORCAST_LOADER_ID, null, this);
         mForecastAdapter = new ForecastAdapter(getActivity(), null, 0);
         mForecastAdapter.useTodayLayout(mUseTodayLayout);
 
@@ -129,6 +139,8 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        Log.d(LOG_TAG, "onSaveInstanceState");
+
         super.onSaveInstanceState(outState);
         //when tablets rotate the currently selected list item needs to be saved.
         //when no item is selected mPosition will be set to ListView.INVALID_POSITION
@@ -140,34 +152,55 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(LOG_TAG, "onCreateOptionsMenu");
+
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.forecastfragment, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(LOG_TAG, "onOptionsItemsSelected");
+
         int id = item.getItemId();
         if (id == R.id.action_refresh){
+            Log.d(LOG_TAG, "refresh weather");
             updateWeatherForecast();
             return true;
         }
         return super.onOptionsItemSelected(item);
     }
     public void onLocationChanged(){
+        Log.d(LOG_TAG, "onLocationChanged");
+
         updateWeatherForecast();
-        getLoaderManager().restartLoader(LOADER_ID, null, this);
+        Log.d(LOG_TAG, "restartLoader");
+
+        getLoaderManager().restartLoader(FORCAST_LOADER_ID, null, this);
     }
 
     private void updateWeatherForecast() {
-        String location =Utility.getPreferredLocation(getActivity());
-        new FetchWeatherTask(getActivity()).execute(location);
+        Log.d(LOG_TAG, "updateWeatherForecast");
+
+        Intent alarmIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
+        alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, Utility.getPreferredLocation(getActivity()));
+
+        //Wrap in a pending intent which only fires once.
+        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,alarmIntent,PendingIntent.FLAG_ONE_SHOT);
+
+
+        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
+
+        //Set the AlarmManager to wake up the system.
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pi);
     }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        Log.d(LOG_TAG, "onCreateLoader");
 
-        if (id == LOADER_ID) {
+        if (id == FORCAST_LOADER_ID) {
             String locationSetting = Utility.getPreferredLocation(getActivity());
 
             // Sort order:  Ascending, by date.
@@ -186,13 +219,20 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader,  Cursor cursor) {
+        Log.d(LOG_TAG, "onLoadFinished");
+
         mForecastAdapter.swapCursor(cursor);
-        mListView.smoothScrollToPosition(mPosition);
-        mListView.setSelection(mPosition);
+        if (mPosition != ListView.INVALID_POSITION) {
+            // If we don't need to restart the loader, and there's a desired position to restore
+            // to, do so now.
+            mListView.smoothScrollToPosition(mPosition);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader loader) {
         mForecastAdapter.swapCursor(null);
+        Log.d(LOG_TAG, "onLoaderReset");
+
     }
 }

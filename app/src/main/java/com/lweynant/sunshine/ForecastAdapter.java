@@ -17,7 +17,7 @@ import android.widget.TextView;
 public class ForecastAdapter extends CursorAdapter {
     private static final int VIEW_TYPE_TODAY = 0;
     private static final int VIEW_TYPE_FUTURE_DAY = 1;
-    private static final String TAG = ForecastAdapter.class.getSimpleName();
+    private static final String LOG_TAG = ForecastAdapter.class.getSimpleName();
     private boolean mUseTodayLayout = true;
 
     public void useTodayLayout(boolean useTodayLayout) {
@@ -72,6 +72,7 @@ public class ForecastAdapter extends CursorAdapter {
      */
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
+        Log.d(LOG_TAG, "newView");
         int viewType = getItemViewType(cursor.getPosition());
         int layoutId = -1;
         if (viewType == VIEW_TYPE_TODAY){
@@ -90,10 +91,10 @@ public class ForecastAdapter extends CursorAdapter {
      */
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
+        Log.d(LOG_TAG, "bindView");
         ViewHolder viewHolder = (ViewHolder) view.getTag();
         // Read weather icon ID from cursor
         int weatherConditionId = cursor.getInt(ForecastFragment.COL_WEATHER_CONDITION_ID);
-        Log.d(TAG, "weather condition id = " + weatherConditionId );
         int viewType = getItemViewType(cursor.getPosition());
         if (viewType == VIEW_TYPE_TODAY){
             viewHolder.iconView.setImageResource(Utility.getArtResourceForWeatherCondition(weatherConditionId));
