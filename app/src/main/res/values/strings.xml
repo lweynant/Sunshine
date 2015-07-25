@@ -45,5 +45,8 @@
 
     <!-- Pressure format CHAR LIMIT=25] -->
     <string name="format_pressure">Pressure: <xliff:g id="pressure">%1.0f</xliff:g> hPa</string>
-
+    <!-- Account type (for sync-adapter authenticator) -->
+    <!-- SyncAdapter related -->
+    <string name="sync_account_type">sunshine.lweynant.com</string>
+    <string name="content_authority">com.lweynant.sunshine</string>
 </resources>
