@@ -22,7 +22,6 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.lweynant.sunshine.data.WeatherContract;
-import com.lweynant.sunshine.service.SunshineService;
 import com.lweynant.sunshine.sync.SunshineSyncAdapter;
 
 
@@ -184,17 +183,6 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
         Log.d(LOG_TAG, "updateWeatherForecast");
         SunshineSyncAdapter.syncImmediately(getActivity());
 
-//        Intent alarmIntent = new Intent(getActivity(), SunshineService.AlarmReceiver.class);
-//        alarmIntent.putExtra(SunshineService.LOCATION_QUERY_EXTRA, Utility.getPreferredLocation(getActivity()));
-//
-//        //Wrap in a pending intent which only fires once.
-//        PendingIntent pi = PendingIntent.getBroadcast(getActivity(), 0,alarmIntent,PendingIntent.FLAG_ONE_SHOT);
-//
-//
-//        AlarmManager am=(AlarmManager)getActivity().getSystemService(Context.ALARM_SERVICE);
-//
-//        //Set the AlarmManager to wake up the system.
-//        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pi);
     }
 
 
